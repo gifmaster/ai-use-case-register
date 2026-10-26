@@ -88,6 +88,7 @@ pytest
 | [EU AI Act Risk Check](https://github.com/gifmaster/ai-act-risk-check) | Classify an AI system |
 | [AI Contract Clause Checker](https://github.com/gifmaster/contract-clause-checker) | Review the vendor contract |
 | This register | Keep track of all of it |
+| [Regulation Navigator](https://github.com/gifmaster/regulation-navigator) | See which of the AI Act, GDPR, NIS2 and DORA apply, and where they overlap |
 | [Practical AI Governance Framework](https://github.com/gifmaster/ai-governance-framework) | The method behind it |
 
 ## About
