@@ -1,0 +1,18 @@
+# Answer key for samples/fjordvik_logistik_register.csv, evaluated on 2026-10-26.
+# Every check must fire exactly for these use cases, and nowhere else.
+
+today: "2026-10-26"
+issues:
+  UC-001: []
+  UC-002: [review_overdue]
+  UC-003: [fria_undecided]
+  UC-004: []
+  UC-005: [prohibited_in_use, live_without_approval, intensity_mismatch, no_next_review]
+  UC-006: [no_owner]
+  UC-007: [redesign_needed, intensity_mismatch, fria_undecided]
+  UC-008: []
+  UC-009: [no_next_review]
+  UC-010: [review_overdue, council_not_involved]
+  UC-011: [personal_data_unknown]
+  UC-012: []
+  UC-013: [not_classified, no_oversight_level, dpia_undecided]

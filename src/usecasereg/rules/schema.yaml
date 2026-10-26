@@ -1,0 +1,47 @@
+# Columns of the AI register. Identical to templates/ai-register.csv in
+# https://github.com/gifmaster/ai-governance-framework, so files move freely between the two.
+
+columns:
+  - {id: use_case_id, label: ID}
+  - {id: name, label: Name}
+  - {id: purpose, label: Purpose}
+  - {id: business_unit, label: Business unit}
+  - {id: use_case_owner, label: Use case owner}
+  - {id: ai_system, label: AI system}
+  - {id: vendor, label: Vendor}
+  - {id: our_role, label: Our role, allowed: [deployer, provider]}
+  - {id: affected_people, label: Affected people}
+  - {id: personal_data, label: Personal data, allowed: ["yes", "no"]}
+  - {id: oversight_level, label: Oversight level, allowed: ["1", "2", "3", "4", "5"]}
+  - {id: eu_ai_act_tier, label: EU AI Act tier, allowed: [prohibited, high, limited, minimal, out_of_scope]}
+  - {id: governance_intensity, label: Governance intensity, allowed: [light, standard, enhanced, strict, redesign, stop]}
+  - {id: dpia_required, label: DPIA required, allowed: ["yes", "no"]}
+  - {id: fria_required, label: FRIA required, allowed: ["yes", "no"]}
+  - {id: status, label: Status, allowed: [idea, intake, assessment, live, retired]}
+  - {id: approved_by, label: Approved by}
+  - {id: approved_on, label: Approved on, type: date}
+  - {id: next_review, label: Next review, type: date}
+  - {id: notes, label: Notes}
+
+oversight_levels:
+  "1": Human-Only
+  "2": AI-Assisted
+  "3": AI-Collaborative
+  "4": AI-Embedded
+  "5": AI-Driven
+
+# Governance intensity = EU AI Act risk tier x AI Oversight Scale level.
+# Source: Practical AI Governance Framework, chapter 3.
+intensity:
+  minimal:      {"1": light,   "2": light,    "3": light,    "4": standard, "5": enhanced}
+  limited:      {"1": light,   "2": light,    "3": standard, "4": standard, "5": enhanced}
+  high:         {"1": enhanced, "2": enhanced, "3": enhanced, "4": strict,  "5": redesign}
+  prohibited:   {"1": stop,    "2": stop,     "3": stop,     "4": stop,     "5": stop}
+  out_of_scope: {"1": light,   "2": light,    "3": light,    "4": light,    "5": light}
+
+# Review interval in months per governance intensity (framework chapter 4, gate G4)
+review_months:
+  light: 12
+  standard: 12
+  enhanced: 12
+  strict: 6
