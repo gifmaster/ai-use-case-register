@@ -30,6 +30,7 @@ from usecasereg import (  # noqa: E402
     value_errors,
 )
 from usecasereg.engine import normalise  # noqa: E402
+from usecasereg.pdf import markdown_to_pdf  # noqa: E402
 
 RISK_CHECK = "https://ai-act-risk-check.streamlit.app"
 REPO = "https://github.com/gifmaster/ai-use-case-register"
@@ -201,6 +202,9 @@ with tab_export:
     st.download_button("Register and health check (Excel)", to_xlsx(rows, issues), f"{slug}-register.xlsx",
                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     report = council_report(rows, issues, st.session_state.org)
+    st.download_button("AI Council review (PDF)", markdown_to_pdf(report, "AI Use Case Register"),
+                       f"{slug}-council-review.pdf", "application/pdf", type="primary",
+                       help="Ready to send to the AI Council before the quarterly meeting.")
     st.download_button("AI Council review (Markdown)", report, f"{slug}-council-review.md", "text/markdown")
     with st.expander("Preview the council review"):
         st.markdown(report)

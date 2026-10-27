@@ -10,7 +10,7 @@ Most companies keep their AI inventory in a spreadsheet that nobody checks. This
 - **Calculates the governance intensity** of each use case from its EU AI Act risk tier and how much the AI acts on its own, and flags entries where the recorded intensity is wrong
 - **Runs a health check** on the whole register: prohibited AI still in use, live without approval, no owner, overdue reviews, high-risk without a decision on a fundamental rights impact assessment, and more
 - **Imports results from the [EU AI Act Risk Check](https://ai-act-risk-check.streamlit.app)**: upload its report and the risk tier is filled in
-- **Produces the AI Council's quarterly review** as a ready-to-use document
+- **Produces the AI Council's quarterly review** as a ready-to-send PDF (or Markdown)
 
 ![Screenshot](docs/screenshot.png)
 
@@ -73,7 +73,7 @@ pip install pytest
 pytest
 ```
 
-37 tests, including:
+40 tests, including:
 
 - the sample register has **planted problems**, and an [answer key](tests/expected_issues.yaml) states exactly which checks must fire for which use case. Every check is covered, and a check firing where it should not fails the build
 - the intensity matrix, case by case
