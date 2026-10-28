@@ -9,7 +9,7 @@ import pytest
 
 pypdf = pytest.importorskip("pypdf")
 
-from usecasereg import Checks, council_report, read_csv  # noqa: E402
+from usecasereg import SCHEMA, Checks, council_report, read_csv  # noqa: E402
 from usecasereg.pdf import fpdf_markdown, markdown_to_pdf, plain, spans  # noqa: E402
 
 
@@ -18,7 +18,7 @@ def pdf_text(data: bytes) -> str:
     pages = []
     for n, page in enumerate(pypdf.PdfReader(io.BytesIO(data)).pages):
         lines = (page.extract_text() or "").splitlines()
-        lines = [ln for ln in lines if not re.search(r"\|\s+page \d+ of \d+$", ln)]
+        lines = [ln for ln in lines if not re.search(r"\|\s+page \d+ of \d+$", ln) and not ln.startswith("Rules last reviewed")]
         if n > 0 and lines:
             lines = lines[1:]  # the running header repeats the title on every page after the first
         pages.append(" ".join(lines))
@@ -69,3 +69,10 @@ def test_pdf_credits_the_author():
     raw = " ".join(pg.extract_text() or "" for pg in pypdf.PdfReader(io.BytesIO(data)).pages)
     assert "Built by Alexander Senderovitz, senderovitz.eu" in raw
     assert pypdf.PdfReader(io.BytesIO(data)).metadata.author == "Alexander Senderovitz"
+
+
+def test_pdf_footer_shows_the_review_date():
+    data = markdown_to_pdf("# T\n\n- a", "Tool", reviewed=SCHEMA.last_reviewed)
+    raw = " ".join(pg.extract_text() or "" for pg in pypdf.PdfReader(io.BytesIO(data)).pages)
+    assert f"Rules last reviewed: {SCHEMA.last_reviewed} by Alexander Senderovitz" in raw
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", SCHEMA.last_reviewed)

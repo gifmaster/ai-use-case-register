@@ -1,6 +1,9 @@
 # Columns of the AI register. Identical to templates/ai-register.csv in
 # https://github.com/gifmaster/ai-governance-framework, so files move freely between the two.
 
+# Date the rules were last checked against their sources. Update when you review them.
+last_reviewed: "2026-10-26"
+
 columns:
   - {id: use_case_id, label: ID}
   - {id: name, label: Name}
