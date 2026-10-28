@@ -45,3 +45,18 @@ def test_positioning_and_limits_visible():
     at = run()
     assert any("Already have a register" in m.value for m in at.markdown)
     assert any("What this register is" in e.label for e in at.expander)
+
+
+def test_training_log_tab_and_evidence_pack():
+    at = run()
+    assert len(at.session_state.training) == 6
+    assert any("AI literacy" in t.label for t in at.tabs)
+    md = all_md(at)
+    assert "Enhanced or strict use case without a trained overseer" in md
+    assert any("Preview the evidence pack" in e.label for e in at.expander)
+
+
+def test_empty_clears_training_log():
+    at = run()
+    at.button(key="btn_empty").click().run()
+    assert not at.exception and at.session_state.training == []
