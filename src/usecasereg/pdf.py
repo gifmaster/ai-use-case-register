@@ -84,6 +84,7 @@ class _Doc(FPDF):
             self.add_font(FONT, style, str(FONT_DIR / file))
         self.set_title(title)
         self.set_creator(footer)
+        self.set_author("Alexander Senderovitz")
         self.MARKDOWN_LINK_COLOR = ACCENT
         self.MARKDOWN_LINK_UNDERLINE = False
 
@@ -99,6 +100,7 @@ class _Doc(FPDF):
         self.set_y(-12)
         self.set_font(FONT, "", 8)
         self.set_text_color(*MUTED)
+        self.cell(self.epw / 2, 4, "Built by Alexander Senderovitz, senderovitz.eu")
         self.cell(0, 4, f"{self.footer_text}  |  page {self.page_no()} of {{nb}}", align="R")
 
     def rich(self, text: str, size: float = 10, color=INK, indent: float = 0, marker: str = "", base_style: str = ""):

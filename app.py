@@ -88,6 +88,7 @@ issues = checks().run(rows)
 errors = value_errors(rows)
 
 st.title("AI Use Case Register")
+st.caption("Built by [Alexander Senderovitz](https://senderovitz.eu)")
 st.caption(f"{st.session_state.org or 'Your organisation'} · {len(rows)} use cases · checked {date.today().isoformat()}")
 st.markdown("**Already have a register in Excel?** Upload it in the sidebar and get a health check: missing owners, overdue reviews, "
             "high-risk systems without a FRIA, and more. No new system to adopt, and nothing is stored.")
