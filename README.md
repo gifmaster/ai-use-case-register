@@ -11,10 +11,12 @@ Most companies keep their AI inventory in a spreadsheet that nobody checks. This
 - **Runs a health check** on the whole register: prohibited AI still in use, live without approval, no owner, overdue reviews, high-risk without a decision on a fundamental rights impact assessment, and more
 - **Imports results from the [EU AI Act Risk Check](https://ai-act-risk-check.streamlit.app)**: upload its report and the risk tier is filled in
 - **Produces the AI Council's quarterly review** as a ready-to-send PDF (or Markdown)
+- **Checks the AI literacy training log against the register**: no measure for all staff, enhanced or strict use cases live without a trained overseer, overdue refreshes, training without evidence (EU AI Act Art. 4, as amended by Regulation (EU) 2026/1744)
+- **Builds an evidence pack** for a customer questionnaire, an auditor or an authority: use cases, impact assessment decisions, AI literacy measures and open issues in one PDF, with the register, training log and health check as annexes in a ZIP
 
 ![Screenshot](docs/screenshot.png)
 
-**[Try it live](https://ai-use-case-register.streamlit.app)** with a fictional logistics company and its 13 AI use cases.
+**[Try it live](https://ai-use-case-register.streamlit.app)** with a fictional logistics company, its 13 AI use cases and its training log.
 
 ## How it fits together
 
@@ -24,6 +26,10 @@ flowchart LR
     C[AI Contract Clause Checker] -->|vendor findings| R
     R --> H[Health check]
     R --> Q[AI Council review]
+    T[Training log] --> L[AI literacy check]
+    R --> L
+    R --> E[Evidence pack]
+    L --> E
     F[Practical AI Governance Framework] -.defines.-> R
 ```
 
@@ -53,6 +59,14 @@ The matrix lives in [`schema.yaml`](src/usecasereg/rules/schema.yaml) and the 13
   ref: Framework ch. 4 gate G3
 ```
 
+## AI literacy and the evidence pack
+
+The training log uses the columns of the framework's [training log template](https://github.com/gifmaster/ai-governance-framework/blob/main/templates/training-log.csv), and the plan behind it is the framework's [AI literacy plan](https://github.com/gifmaster/ai-governance-framework/blob/main/templates/ai-literacy-plan.md). Its five checks and their texts are in [`training.yaml`](src/usecasereg/rules/training.yaml). Because they compare two files, the logic is in [`training.py`](src/usecasereg/training.py), one short function per check.
+
+Art. 4 asks for measures that support AI literacy, not a guaranteed level for each person. The checks therefore look for measures that are missing or out of date. They cannot judge whether a session was any good.
+
+The evidence pack only summarises what the register and the log say, with the gaps the checks found. It is not an audit or a certificate, and says so on its last page.
+
 ## Where it fits
 
 Use it as a **health check for the spreadsheet you already have**, or as a lightweight register when you have none. It is not a workflow platform: no approvals, reminders, accounts or audit trail. If you outgrow it, the Export tab writes a CSV with plain headers that is easy to map into a GRC platform's import. Mandatory registers (GDPR Art. 30, the DORA Register of Information) are separate and are not replaced by this one.
@@ -77,13 +91,14 @@ pip install pytest
 pytest
 ```
 
-40 tests, including:
+72 tests, including:
 
 - the sample register has **planted problems**, and an [answer key](tests/expected_issues.yaml) states exactly which checks must fire for which use case. Every check is covered, and a check firing where it should not fails the build
 - the intensity matrix, case by case
 - the columns match the framework template
 - CSV (comma or semicolon) and Excel round trips
 - import of Risk Check reports, and app smoke tests
+- a training log with planted gaps and its own [answer key](tests/expected_training_issues.yaml), the evidence pack's contents and its ZIP annexes
 
 ## Part of a toolkit
 

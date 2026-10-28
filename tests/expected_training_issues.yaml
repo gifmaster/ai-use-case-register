@@ -1,0 +1,16 @@
+# Answer key for samples/fjordvik_logistik_training_log.csv checked against
+# samples/fjordvik_logistik_register.csv on 2026-10-26.
+# Every training check must fire exactly for these items, and nowhere else.
+# no_all_staff_training is covered by a separate test that removes T-001.
+
+today: "2026-10-26"
+issues:
+  T-001: []
+  T-002: []
+  T-003: [no_evidence]
+  T-004: [refresh_overdue]
+  T-005: [unknown_use_case]
+  T-006: []
+  UC-008: []
+  UC-010: [overseer_training_missing]
+  Training log: []

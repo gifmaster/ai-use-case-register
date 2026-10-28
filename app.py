@@ -31,11 +31,22 @@ from usecasereg import (  # noqa: E402
     value_errors,
 )
 from usecasereg.engine import normalise  # noqa: E402
+from usecasereg.evidence import evidence_pack, evidence_zip  # noqa: E402
 from usecasereg.pdf import markdown_to_pdf  # noqa: E402
+from usecasereg.training import (  # noqa: E402
+    TRAINING,
+    check_training,
+    literacy_summary,
+    normalise_training,
+    read_training,
+    training_errors,
+    training_to_csv,
+)
 
 RISK_CHECK = "https://ai-act-risk-check.streamlit.app"
 REPO = "https://github.com/gifmaster/ai-use-case-register"
 SAMPLE = ROOT / "samples" / "fjordvik_logistik_register.csv"
+SAMPLE_LOG = ROOT / "samples" / "fjordvik_logistik_training_log.csv"
 SEV = {"high": "🔴", "medium": "🟠", "low": "🟡"}
 
 st.set_page_config(page_title="AI Use Case Register", page_icon="🗂️", layout="wide")
@@ -51,8 +62,14 @@ def set_rows(rows):
     st.session_state.editor_version = st.session_state.get("editor_version", 0) + 1
 
 
+def set_training(rows):
+    st.session_state.training = rows
+    st.session_state.log_version = st.session_state.get("log_version", 0) + 1
+
+
 if "rows" not in st.session_state:
     set_rows(read_csv(SAMPLE.read_bytes()))
+    set_training(read_training(SAMPLE_LOG.read_bytes()))
     st.session_state.org = "Fjordvik Logistik A/S (fictional)"
 
 # --- Sidebar -------------------------------------------------------------------
@@ -67,13 +84,24 @@ with st.sidebar:
             st.success(f"Loaded {len(st.session_state.rows)} use cases.")
         except Exception as exc:
             st.error(f"Could not read the file: {exc}")
+    up_log = st.file_uploader("Open a training log (CSV or Excel), optional", type=["csv", "xlsx"], key="up_log",
+                              help="The AI literacy training log from the framework's template. Checked against the register.")
+    if up_log and st.session_state.get("loaded_log") != (up_log.name, up_log.size):
+        try:
+            set_training(read_training(up_log.getvalue(), up_log.name))
+            st.session_state.loaded_log = (up_log.name, up_log.size)
+            st.success(f"Loaded {len(st.session_state.training)} training entries.")
+        except Exception as exc:
+            st.error(f"Could not read the training log: {exc}")
     c1, c2 = st.columns(2)
     if c1.button("Sample", width="stretch", key="btn_sample"):
         set_rows(read_csv(SAMPLE.read_bytes()))
+        set_training(read_training(SAMPLE_LOG.read_bytes()))
         st.session_state.org = "Fjordvik Logistik A/S (fictional)"
         st.rerun()
     if c2.button("Empty", width="stretch", key="btn_empty"):
         set_rows([])
+        set_training([])
         st.session_state.org = ""
         st.rerun()
     st.caption("Nothing is stored on the server. Download your register before closing the page.")
@@ -84,8 +112,11 @@ with st.sidebar:
     )
 
 rows = st.session_state.rows
+training = st.session_state.training
 issues = checks().run(rows)
 errors = value_errors(rows)
+training_issues = check_training(training, rows)
+log_errors = training_errors(training)
 
 st.title("AI Use Case Register")
 st.caption(f"Built by [Alexander Senderovitz](https://senderovitz.eu) · Rules last reviewed {SCHEMA.last_reviewed}")
@@ -93,7 +124,8 @@ st.caption(f"{st.session_state.org or 'Your organisation'} · {len(rows)} use ca
 st.markdown("**Already have a register in Excel?** Upload it in the sidebar and get a health check: missing owners, overdue reviews, "
             "high-risk systems without a FRIA, and more. No new system to adopt, and nothing is stored.")
 
-tab_over, tab_reg, tab_health, tab_add, tab_export = st.tabs(["Overview", "Register", f"Health check ({len(issues)})", "Add use case", "Export"])
+tab_over, tab_reg, tab_health, tab_lit, tab_add, tab_export = st.tabs(
+    ["Overview", "Register", f"Health check ({len(issues)})", f"AI literacy ({len(training_issues)})", "Add use case", "Export"])
 
 # --- Overview -----------------------------------------------------------------
 with tab_over:
@@ -151,6 +183,37 @@ with tab_health:
     for i in [x for x in issues if x.severity in sev_filter]:
         with st.container(border=True):
             st.markdown(f"{SEV[i.severity]} **{i.use_case_id} {i.name}** · {i.title}  \n{i.action}  \n`{i.ref}` · rule `{i.check_id}`")
+
+# --- AI literacy --------------------------------------------------------------
+with tab_lit:
+    st.markdown("Everyone who uses AI at work needs measures that support their AI literacy (EU AI Act Art. 4, as amended "
+                "in 2026). The training log records them. It uses the columns of the "
+                "[framework's training log template](https://github.com/gifmaster/ai-governance-framework/blob/main/templates/training-log.csv), "
+                "and is checked against the register.")
+    lit = literacy_summary(training, rows)
+    m = st.columns(3)
+    m[0].metric("Training entries", lit["sessions"])
+    m[1].metric("Most recent", lit["last_session"] or "none")
+    m[2].metric("Use cases with a trained overseer", f"{len(lit['overseer_covered'])} of {len(lit['overseer_needed'])}",
+                help="Live use cases with enhanced or strict governance intensity need at least one trained overseer.")
+    for i in training_issues:
+        with st.container(border=True):
+            st.markdown(f"{SEV[i.severity]} **{i.use_case_id} {i.name}** · {i.title}  \n{i.action}  \n`{i.ref}` · rule `{i.check_id}`")
+    if not training_issues:
+        st.success("No AI literacy gaps found.")
+    st.subheader("Training log")
+    ldf = pd.DataFrame(training, columns=TRAINING.ids)
+    lcfg = {c: st.column_config.SelectboxColumn(TRAINING.labels[c], options=[""] + v) for c, v in TRAINING.allowed.items()}
+    lcfg.update({c: st.column_config.TextColumn(TRAINING.labels[c]) for c in TRAINING.ids if c not in TRAINING.allowed})
+    ledited = st.data_editor(ldf, column_config=lcfg, num_rows="dynamic", hide_index=True, width="stretch",
+                             key=f"log_{st.session_state.get('log_version', 0)}")
+    new_log = normalise_training(ledited.fillna("").to_dict("records"))
+    if new_log != training:
+        st.session_state.training = new_log
+        st.rerun()
+    if log_errors:
+        st.warning("Values to fix:\n\n" + "\n".join(f"- {e}" for e in log_errors))
+    st.caption("Log groups rather than individuals where that is enough. Several use cases in one entry: separate the IDs with ';'.")
 
 # --- Add use case -------------------------------------------------------------
 with tab_add:
@@ -214,6 +277,20 @@ with tab_export:
     st.download_button("AI Council review (Markdown)", report, f"{slug}-council-review.md", "text/markdown")
     with st.expander("Preview the council review"):
         st.markdown(report)
+
+    st.subheader("AI literacy and evidence")
+    st.download_button("Training log (CSV)", training_to_csv(training), f"{slug}-training-log.csv", "text/csv")
+    pack = evidence_pack(rows, issues, training, training_issues, st.session_state.org)
+    st.markdown("**Evidence pack.** One document for a customer questionnaire, an auditor or an authority: the use cases, "
+                "impact assessment decisions, AI literacy measures and open issues. The ZIP adds the register, the training log "
+                "and the health check as annexes.")
+    c1, c2 = st.columns(2)
+    c1.download_button("Evidence pack (PDF)", markdown_to_pdf(pack, "AI governance evidence pack", reviewed=SCHEMA.last_reviewed),
+                       f"{slug}-evidence-pack.pdf", "application/pdf", key="dl_pack_pdf")
+    c2.download_button("Evidence pack with annexes (ZIP)", evidence_zip(rows, issues, training, training_issues,
+                       st.session_state.org, slug=slug), f"{slug}-evidence-pack.zip", "application/zip", key="dl_pack_zip")
+    with st.expander("Preview the evidence pack"):
+        st.markdown(pack)
 
     with st.expander("What this register is, and is not"):
         st.markdown(
