@@ -74,9 +74,9 @@ def fpdf_markdown(text: str) -> str:
 
 
 class _Doc(FPDF):
-    def __init__(self, title: str, footer: str):
+    def __init__(self, title: str, footer: str, reviewed: str = ""):
         super().__init__(orientation="P", unit="mm", format="A4")
-        self.doc_title, self.footer_text = title, footer
+        self.doc_title, self.footer_text, self.reviewed = title, footer, reviewed
         self.set_margins(18, 18, 18)
         self.set_auto_page_break(True, margin=18)
         for style, file in (("", "DejaVuSans.ttf"), ("B", "DejaVuSans-Bold.ttf"),
@@ -97,11 +97,13 @@ class _Doc(FPDF):
             self.ln(4)
 
     def footer(self):
-        self.set_y(-12)
+        self.set_y(-15 if self.reviewed else -12)
         self.set_font(FONT, "", 8)
         self.set_text_color(*MUTED)
         self.cell(self.epw / 2, 4, "Built by Alexander Senderovitz, senderovitz.eu")
-        self.cell(0, 4, f"{self.footer_text}  |  page {self.page_no()} of {{nb}}", align="R")
+        self.cell(0, 4, f"{self.footer_text}  |  page {self.page_no()} of {{nb}}", align="R", new_x="LMARGIN", new_y="NEXT")
+        if self.reviewed:
+            self.cell(0, 4, f"Rules last reviewed: {self.reviewed} by Alexander Senderovitz")
 
     def rich(self, text: str, size: float = 10, color=INK, indent: float = 0, marker: str = "", base_style: str = ""):
         """A wrapped line of inline Markdown with an optional hanging marker. Whole words wrap, also across pages."""
@@ -189,11 +191,11 @@ def _cells(line: str) -> list[str]:
     return [c.strip() for c in line.strip().strip("|").split("|")]
 
 
-def markdown_to_pdf(md: str, footer: str = "Report", title: str | None = None) -> bytes:
+def markdown_to_pdf(md: str, footer: str = "Report", title: str | None = None, reviewed: str = "") -> bytes:
     """Render one of the tool's Markdown reports as an A4 PDF."""
     lines = md.splitlines()
     first = next((ln[2:] for ln in lines if ln.startswith("# ")), footer)
-    doc = _Doc(plain(title or first), footer)
+    doc = _Doc(plain(title or first), footer, reviewed)
     doc.add_page()
     i = 0
     while i < len(lines):

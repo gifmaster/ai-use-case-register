@@ -42,6 +42,7 @@ class Schema:
         self.oversight_levels = {str(k): v for k, v in data["oversight_levels"].items()}
         self.intensity = {t: {str(k): v for k, v in m.items()} for t, m in data["intensity"].items()}
         self.review_months = data["review_months"]
+        self.last_reviewed: str = str(data.get("last_reviewed", ""))
 
 
 SCHEMA = Schema()
