@@ -123,3 +123,13 @@ def test_check_validation(mutate, msg):
     mutate(data)
     with pytest.raises(ValueError, match=msg):
         Checks(data)
+
+
+def test_platform_csv_uses_plain_headers_and_yes_no():
+    from usecasereg import to_platform_csv
+
+    rows = read_csv((ROOT / "samples" / "fjordvik_logistik_register.csv").read_bytes())
+    lines = to_platform_csv(rows).splitlines()
+    assert lines[0].startswith("ID,Name,Description,")
+    assert "Yes" in lines[1] or "No" in lines[1]
+    assert len(lines) == len(rows) + 1

@@ -39,3 +39,9 @@ def test_empty_register():
     at = run()
     at.button(key="btn_empty").click().run()
     assert not at.exception and at.session_state.rows == []
+
+
+def test_positioning_and_limits_visible():
+    at = run()
+    assert any("Already have a register" in m.value for m in at.markdown)
+    assert any("What this register is" in e.label for e in at.expander)

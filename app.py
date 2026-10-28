@@ -26,6 +26,7 @@ from usecasereg import (  # noqa: E402
     suggested_next_review,
     summary,
     to_csv,
+    to_platform_csv,
     to_xlsx,
     value_errors,
 )
@@ -87,6 +88,8 @@ errors = value_errors(rows)
 
 st.title("AI Use Case Register")
 st.caption(f"{st.session_state.org or 'Your organisation'} · {len(rows)} use cases · checked {date.today().isoformat()}")
+st.markdown("**Already have a register in Excel?** Upload it in the sidebar and get a health check: missing owners, overdue reviews, "
+            "high-risk systems without a FRIA, and more. No new system to adopt, and nothing is stored.")
 
 tab_over, tab_reg, tab_health, tab_add, tab_export = st.tabs(["Overview", "Register", f"Health check ({len(issues)})", "Add use case", "Export"])
 
@@ -200,7 +203,22 @@ with tab_export:
     st.download_button("Register (CSV)", to_csv(rows), f"{slug}-register.csv", "text/csv")
     st.download_button("Register and health check (Excel)", to_xlsx(rows, issues), f"{slug}-register.xlsx",
                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    st.download_button("Register for a GRC platform import (CSV)", to_platform_csv(rows), f"{slug}-platform-import.csv", "text/csv",
+                       help="Plain-language headers and Yes/No values, easy to map in the import wizard of tools such as OneTrust or ServiceNow. Not a vendor template.")
     report = council_report(rows, issues, st.session_state.org)
     st.download_button("AI Council review (Markdown)", report, f"{slug}-council-review.md", "text/markdown")
     with st.expander("Preview the council review"):
         st.markdown(report)
+
+    with st.expander("What this register is, and is not"):
+        st.markdown(
+            "- **It is** a health check and a lightweight register for the AI use cases you decide to track. Use it alone, "
+            "or as the evidence you hand to an auditor, a customer or a larger platform.\n"
+            "- **It is not** a workflow system. There are no approvals, reminders, user accounts or audit trail. "
+            "If you need those, use a GRC platform and import this CSV.\n"
+            "- **Other mandatory registers exist.** GDPR Art. 30 requires a record of processing activities. "
+            "Financial entities under DORA must keep a Register of Information on ICT third-party arrangements (Art. 28(3)). "
+            "Providers who rely on the Art. 6(3) exception must register in the EU database (Art. 49). This register does not replace them, "
+            "but it is a good place to find the use cases that feed them.\n"
+            "- **Checks are rules, not judgement.** They find gaps in what you wrote down. They cannot tell whether what you wrote is true."
+        )

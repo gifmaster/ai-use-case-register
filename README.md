@@ -53,6 +53,10 @@ The matrix lives in [`schema.yaml`](src/usecasereg/rules/schema.yaml) and the 13
   ref: Framework ch. 4 gate G3
 ```
 
+## Where it fits
+
+Use it as a **health check for the spreadsheet you already have**, or as a lightweight register when you have none. It is not a workflow platform: no approvals, reminders, accounts or audit trail. If you outgrow it, the Export tab writes a CSV with plain headers that is easy to map into a GRC platform's import. Mandatory registers (GDPR Art. 30, the DORA Register of Information) are separate and are not replaced by this one.
+
 ## Your data stays yours
 
 Nothing is stored on the server. You open a register from CSV or Excel, work on it, and download it again. For real client data, run it locally.
