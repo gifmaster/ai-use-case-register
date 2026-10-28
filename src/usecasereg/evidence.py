@@ -47,7 +47,7 @@ def evidence_pack(rows: list[Row], issues: list[Issue], training: list[Row], tra
         f"- **AI use cases recorded:** {len(active)} active, {s['status'].get('live', 0)} live, "
         f"{len(rows) - len(active)} retired",
         f"- **High-risk under the EU AI Act:** {s['eu_ai_act_tier'].get('high', 0)}. "
-        "Deployer duties for Annex III high-risk systems apply from 2 December 2027.",
+        "Deployer duties for Annex III high-risk systems apply from 2 December 2027 (high-risk AI in Annex I products: 2 August 2028).",
         f"- **AI literacy measures logged:** {lit['sessions']}"
         + (f", most recent on {lit['last_session']}" if lit["last_session"] else ""),
         f"- **Use cases that need a trained overseer:** {len(lit['overseer_needed'])}, "
@@ -117,7 +117,7 @@ def evidence_pack(rows: list[Row], issues: list[Issue], training: list[Row], tra
           "the register's rule-based checks found.",
           "- **It is not** an audit, a certification or legal advice. The checks find gaps in what was written down. "
           "They cannot tell whether what was written down is true.",
-          "- **Other records may be required.** GDPR Art. 30 requires a record of processing activities, and financial "
+          "- **Other records may be required.** GDPR Art. 30 generally requires a record of processing activities, and financial "
           "entities under DORA keep a Register of Information (Art. 28(3)). This pack does not replace them.",
           "- **Annexes** in the ZIP download: the register (CSV), the training log (CSV) and the register with its health "
           "check (Excel).",

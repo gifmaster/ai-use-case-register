@@ -36,7 +36,7 @@ checks:
     severity: medium
     title: Enhanced or strict use case without a trained overseer
     action: Train at least one named overseer for this system and log it with the use case ID.
-    ref: AI literacy plan s. 3; EU AI Act Art. 26(2) for high-risk, from 2 Dec 2027
+    ref: AI literacy plan s. 3; EU AI Act Art. 26(2) for Annex III high-risk, from 2 Dec 2027
 
   - id: refresh_overdue
     scope: entry
