@@ -114,6 +114,32 @@ def to_csv(rows: list[Row], schema: Schema = SCHEMA) -> str:
     return out.getvalue()
 
 
+PLATFORM_HEADERS = {
+    "use_case_id": "ID", "name": "Name", "purpose": "Description", "business_unit": "Business unit",
+    "use_case_owner": "Owner", "ai_system": "AI system", "vendor": "Vendor", "our_role": "Our role",
+    "affected_people": "Affected people", "personal_data": "Personal data", "oversight_level": "Human oversight level",
+    "eu_ai_act_tier": "EU AI Act risk tier", "governance_intensity": "Governance intensity",
+    "dpia_required": "DPIA required", "fria_required": "FRIA required", "status": "Status",
+    "approved_by": "Approved by", "approved_on": "Approved on", "next_review": "Next review", "notes": "Notes",
+}
+YES_NO = {"yes": "Yes", "no": "No"}
+
+
+def to_platform_csv(rows: list[Row], schema: Schema = SCHEMA) -> str:
+    """CSV with plain-language headers and Yes/No values, to ease mapping into a GRC platform's import wizard.
+
+    This is not any vendor's native template. Platforms let you map columns on import; the headers
+    here are chosen to be easy to map, and the mapping is always yours to check.
+    """
+    out = io.StringIO()
+    fields = list(schema.ids)
+    w = csv.writer(out, lineterminator="\n")
+    w.writerow([PLATFORM_HEADERS.get(c, c) for c in fields])
+    for r in rows:
+        w.writerow([YES_NO.get(str(r.get(c, "")).lower(), r.get(c, "")) if c in ("personal_data", "dpia_required", "fria_required") else r.get(c, "") for c in fields])
+    return out.getvalue()
+
+
 def to_xlsx(rows: list[Row], issues: list["Issue"], schema: Schema = SCHEMA) -> bytes:
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill
