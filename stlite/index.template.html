@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Use Case Register</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@__STLITE_VERSION__/build/stlite.css" />
+    <style>
+      #loading { font-family: system-ui, sans-serif; max-width: 36rem; margin: 4rem auto; padding: 0 1rem; color: #333; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>This app runs Python in your browser and needs JavaScript.</noscript>
+    <script type="module">
+      import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@__STLITE_VERSION__/build/stlite.js";
+      const files = __FILES__;
+      mount(
+        {
+          entrypoint: "app.py",
+          requirements: ["pyyaml", "openpyxl", "fpdf2"],
+          files,
+        },
+        document.getElementById("root"),
+      );
+    </script>
+  </body>
+</html>
