@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Use Case Register</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.0/build/stlite.css" />
+    <style>
+      #loading { font-family: system-ui, sans-serif; max-width: 36rem; margin: 4rem auto; padding: 0 1rem; color: #333; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>This app runs Python in your browser and needs JavaScript.</noscript>
+    <script type="module">
+      import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.12.0/build/stlite.js";
+      const files = {
+        "app.py": {
+                "url": "app/app.py"
+        },
+        "NOTICE": {
+                "url": "app/NOTICE"
+        },
+        "LICENSE": {
+                "url": "app/LICENSE"
+        },
+        "samples/fjordvik_logistik_register.csv": {
+                "url": "app/samples/fjordvik_logistik_register.csv"
+        },
+        "samples/fjordvik_logistik_training_log.csv": {
+                "url": "app/samples/fjordvik_logistik_training_log.csv"
+        },
+        "src/usecasereg/__init__.py": {
+                "url": "app/src/usecasereg/__init__.py"
+        },
+        "src/usecasereg/engine.py": {
+                "url": "app/src/usecasereg/engine.py"
+        },
+        "src/usecasereg/evidence.py": {
+                "url": "app/src/usecasereg/evidence.py"
+        },
+        "src/usecasereg/fonts/DejaVuSans-Bold.ttf": {
+                "url": "app/src/usecasereg/fonts/DejaVuSans-Bold.ttf"
+        },
+        "src/usecasereg/fonts/DejaVuSans-BoldOblique.ttf": {
+                "url": "app/src/usecasereg/fonts/DejaVuSans-BoldOblique.ttf"
+        },
+        "src/usecasereg/fonts/DejaVuSans-Oblique.ttf": {
+                "url": "app/src/usecasereg/fonts/DejaVuSans-Oblique.ttf"
+        },
+        "src/usecasereg/fonts/DejaVuSans.ttf": {
+                "url": "app/src/usecasereg/fonts/DejaVuSans.ttf"
+        },
+        "src/usecasereg/fonts/LICENSE-DejaVu.txt": {
+                "url": "app/src/usecasereg/fonts/LICENSE-DejaVu.txt"
+        },
+        "src/usecasereg/pdf.py": {
+                "url": "app/src/usecasereg/pdf.py"
+        },
+        "src/usecasereg/rules/checks.yaml": {
+                "url": "app/src/usecasereg/rules/checks.yaml"
+        },
+        "src/usecasereg/rules/schema.yaml": {
+                "url": "app/src/usecasereg/rules/schema.yaml"
+        },
+        "src/usecasereg/rules/training.yaml": {
+                "url": "app/src/usecasereg/rules/training.yaml"
+        },
+        "src/usecasereg/training.py": {
+                "url": "app/src/usecasereg/training.py"
+        }
+};
+      mount(
+        {
+          entrypoint: "app.py",
+          requirements: ["pyyaml", "openpyxl", "fpdf2"],
+          files,
+        },
+        document.getElementById("root"),
+      );
+    </script>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+# AI literacy training log: columns and checks.
+# Identical to templates/training-log.csv in https://github.com/gifmaster/ai-governance-framework,
+# so the file moves freely between the two.
+
+last_reviewed: "2026-10-28"
+
+columns:
+  - {id: entry_id, label: ID}
+  - {id: learner_group, label: Group, allowed: [all_staff, frequent_user, overseer, management, governance]}
+  - {id: audience, label: Audience}
+  - {id: people, label: People, type: count}
+  - {id: module, label: Module}
+  - {id: use_case_id, label: Use cases covered}
+  - {id: delivered_on, label: Delivered on, type: date}
+  - {id: delivered_by, label: Delivered by}
+  - {id: format, label: Format}
+  - {id: evidence, label: Evidence}
+  - {id: next_refresh, label: Next refresh, type: date}
+
+# Use cases with these governance intensities need a trained overseer before they are live.
+# Source: Practical AI Governance Framework, AI literacy plan section 3.
+overseer_needed_for: [enhanced, strict]
+
+# The checks. Unlike the register checks, these compare two files, so the logic is in
+# training.py and each check id below is implemented there. Titles, actions and references live here.
+checks:
+  - id: no_all_staff_training
+    scope: log
+    severity: high
+    title: No AI literacy measure for all staff recorded
+    action: Run and log a basic session for everyone who uses AI at work, or record the one you already held.
+    ref: EU AI Act Art. 4 (as amended by Reg. (EU) 2026/1744)
+
+  - id: overseer_training_missing
+    scope: use_case
+    severity: medium
+    title: Enhanced or strict use case without a trained overseer
+    action: Train at least one named overseer for this system and log it with the use case ID.
+    ref: AI literacy plan s. 3; EU AI Act Art. 26(2) for Annex III high-risk, from 2 Dec 2027
+
+  - id: refresh_overdue
+    scope: entry
+    severity: low
+    title: Training refresh is overdue
+    action: Hold the refresher, or set a new date if the training is still current.
+    ref: AI literacy plan s. 2
+
+  - id: no_evidence
+    scope: entry
+    severity: low
+    title: Training recorded without evidence
+    action: Note where the attendance list, completion report or briefing note is kept.
+    ref: AI literacy plan s. 4
+
+  - id: unknown_use_case
+    scope: entry
+    severity: low
+    title: Training refers to a use case that is not in the register
+    action: Correct the use case ID, or add the use case to the register.
+    ref: AI literacy plan s. 3

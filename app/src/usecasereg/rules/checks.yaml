@@ -1,0 +1,134 @@
+# Register health checks. Each check fires for a use case (row) when ALL conditions in `when` hold.
+#
+# Condition operators (one per condition):
+#   {field: x, eq: value}            field equals value
+#   {field: x, in: [values]}         field is one of the values
+#   {field: x, not_in: [values]}     field is set and not one of the values
+#   {field: x, empty: true|false}    field is empty / not empty
+#   {field: x, before_today: true}   date field is before today
+#   {field: x, not_contains: text}   field does not contain text (case-insensitive)
+#   {expected_intensity: [values]}   intensity calculated from tier x oversight is one of the values
+#   {intensity_mismatch: true}       recorded intensity differs from the calculated one
+#
+# Severity: high, medium, low.
+
+checks:
+  - id: prohibited_in_use
+    severity: high
+    title: Prohibited AI practice not retired
+    when:
+      - {field: eu_ai_act_tier, eq: prohibited}
+      - {field: status, not_in: [retired]}
+    action: Stop the use case and retire it. Prohibited practices are banned under the EU AI Act.
+    ref: EU AI Act Art. 5
+
+  - id: redesign_needed
+    severity: high
+    title: High-risk use case at oversight level 5
+    when:
+      - {expected_intensity: [redesign]}
+      - {field: status, not_in: [retired]}
+    action: Lower the oversight level so humans can oversee the system effectively, then reclassify.
+    ref: EU AI Act Art. 14, 26(2); Framework ch. 3
+
+  - id: no_owner
+    severity: high
+    title: No use case owner
+    when:
+      - {field: use_case_owner, empty: true}
+      - {field: status, not_in: [retired]}
+    action: Name a business owner who is responsible for the use case from start to finish.
+    ref: Framework ch. 5; ISO/IEC 42001 cl. 5.3
+
+  - id: not_classified
+    severity: high
+    title: Use case in assessment or live without risk classification
+    when:
+      - {field: eu_ai_act_tier, empty: true}
+      - {field: status, in: [assessment, live]}
+    action: Classify the use case. Use the EU AI Act Risk Check and record the tier.
+    ref: EU AI Act Art. 6, 50; Framework ch. 4 gate G2
+
+  - id: live_without_approval
+    severity: high
+    title: Live without a recorded approval
+    when:
+      - {field: status, eq: live}
+      - {field: approved_on, empty: true}
+    action: Record who approved go-live and when, or take the use case back to approval.
+    ref: Framework ch. 4 gate G3
+
+  - id: no_oversight_level
+    severity: medium
+    title: No oversight level recorded
+    when:
+      - {field: oversight_level, empty: true}
+      - {field: status, in: [assessment, live]}
+    action: Record how much the AI acts on its own (AI Oversight Scale 1 to 5).
+    ref: Framework ch. 3
+
+  - id: intensity_mismatch
+    severity: medium
+    title: Governance intensity does not match tier and oversight level
+    when:
+      - {intensity_mismatch: true}
+    action: Update the governance intensity, or correct the tier or oversight level if they are wrong.
+    ref: Framework ch. 3
+
+  - id: review_overdue
+    severity: medium
+    title: Periodic review overdue
+    when:
+      - {field: status, eq: live}
+      - {field: next_review, before_today: true}
+    action: Hold the review and set the next date.
+    ref: Framework ch. 4 gate G4; EU AI Act Art. 26(5)
+
+  - id: no_next_review
+    severity: medium
+    title: Live without a next review date
+    when:
+      - {field: status, eq: live}
+      - {field: next_review, empty: true}
+    action: Set a review date based on the governance intensity.
+    ref: Framework ch. 4 gate G4
+
+  - id: dpia_undecided
+    severity: medium
+    title: Personal data, but no decision on a DPIA
+    when:
+      - {field: personal_data, eq: "yes"}
+      - {field: dpia_required, empty: true}
+      - {field: status, not_in: [retired, idea]}
+    action: Decide with the DPO whether a DPIA is required, and record the answer.
+    ref: GDPR Art. 35
+
+  - id: fria_undecided
+    severity: medium
+    title: High-risk use case without a decision on a FRIA
+    when:
+      - {field: eu_ai_act_tier, eq: high}
+      - {field: fria_required, empty: true}
+      - {field: status, not_in: [retired]}
+    action: Check whether a fundamental rights impact assessment applies (public bodies, credit scoring, life and health insurance).
+    ref: EU AI Act Art. 27
+
+  - id: council_not_involved
+    severity: medium
+    title: Enhanced or strict use case live without AI Council approval
+    when:
+      - {field: governance_intensity, in: [enhanced, strict]}
+      - {field: status, eq: live}
+      - {field: approved_by, not_contains: council}
+      - {field: approved_on, empty: false}
+    action: Enhanced and strict use cases need AI Council approval at go-live. Record it or take it to the council.
+    ref: Framework ch. 4 gate G3; AI Council charter
+
+  - id: personal_data_unknown
+    severity: low
+    title: Personal data not recorded
+    when:
+      - {field: personal_data, empty: true}
+      - {field: status, not_in: [retired, idea]}
+    action: Record whether the use case processes personal data.
+    ref: GDPR Art. 30

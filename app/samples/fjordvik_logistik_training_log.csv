@@ -1,0 +1,7 @@
+entry_id,learner_group,audience,people,module,use_case_id,delivered_on,delivered_by,format,evidence,next_refresh
+T-001,all_staff,All staff,64,AI basics and our AI policy,,2026-09-15,AI Governance Lead,Live session 60 min and e-learning for drivers,Attendance list and e-learning report in HR folder,2027-09-15
+T-002,frequent_user,Customer Service team,9,Using the website chatbot back office,UC-002,2026-05-08,ChatNordic ApS,Workshop 90 min,Slides v1.2 and attendance list,2027-05-08
+T-003,overseer,Planning team,4,Reviewing demand forecasts and overriding them,UC-008,2026-06-02,Head of Planning,Briefing 2 hours,,2027-06-02
+T-004,frequent_user,Marketing team,5,Generating and labelling marketing images,UC-009,2025-08-20,Marketing Manager,Workshop 60 min,Slides v1.0,2026-08-20
+T-005,overseer,HR recruiters,3,Reviewing CV ranking before shortlisting,UC-003;UC-030,2026-10-10,TalentLoop,Vendor training 2 hours,Completion certificates,2027-10-10
+T-006,management,Management team,6,AI risk and accountability for management,,2026-04-22,External adviser,Briefing 90 min,Agenda and minutes,2027-04-22
