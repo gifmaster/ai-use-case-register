@@ -18,7 +18,8 @@ def test_build_copies_app_unchanged_and_lists_every_file(tmp_path):
     mod = _load()
     paths = mod.build(tmp_path)
     assert (tmp_path / "app" / "app.py").read_bytes() == (ROOT / "app.py").read_bytes()
-    for needed in ["src/usecasereg/rules/schema.yaml", "samples/fjordvik_logistik_register.csv"]:
+    for needed in ["src/usecasereg/rules/schema.yaml", "src/usecasereg/rules/ambassadors.yaml", "samples/fjordvik_logistik_register.csv",
+                   "samples/fjordvik_logistik_ambassadors.csv", "samples/fjordvik_logistik_team_coverage.csv"]:
         assert needed in paths and (tmp_path / "app" / needed).is_file()
     html = (tmp_path / "index.html").read_text(encoding="utf-8")
     assert "__FILES__" not in html and "__STLITE_VERSION__" not in html

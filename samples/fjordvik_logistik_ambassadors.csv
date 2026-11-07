@@ -1,0 +1,6 @@
+ambassador_id,name,team,hours_per_month,manager_agreed,start_date,last_exchange,status
+A-001,Karen Holm (fictional),Customer Service,3,yes,2026-06-01,2026-10-14,active
+A-002,Jonas Reiter (fictional),Operations,2,yes,2026-06-01,2026-10-14,active
+A-003,Sofie Lund (fictional),HR,0,yes,2026-06-01,2026-10-14,active
+A-004,Mads Eriksen (fictional),Planning,3,no,2026-06-01,2026-07-02,active
+A-005,Lise Kvist (fictional),Finance,2,yes,2026-09-01,,active

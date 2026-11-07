@@ -1,0 +1,78 @@
+# AI ambassador roster and team coverage: columns, thresholds and checks.
+# The scoring guides are in the Foundations toolkits (AI ambassadors, Training). The thresholds below are
+# a draft starting point with no outcome data behind them. Change them here and the tool follows.
+
+last_reviewed: "2026-11-08"
+
+ambassador_columns:
+  - {id: ambassador_id, label: ID}
+  - {id: name, label: Name or role}
+  - {id: team, label: Team or area}
+  - {id: hours_per_month, label: Hours per month, type: count}
+  - {id: manager_agreed, label: Manager agreed, allowed: ["yes", "no"]}
+  - {id: start_date, label: Start date, type: date}
+  - {id: last_exchange, label: Last exchange, type: date}
+  - {id: status, label: Status, allowed: [active, paused, ended]}
+
+coverage_columns:
+  - {id: team, label: Team or area}
+  - {id: headcount, label: Headcount, type: count}
+  - {id: trained_level1, label: Trained (basic level), type: count}
+  - {id: volunteers_trained, label: Of whom volunteers, type: count}
+
+thresholds:
+  min_active_ambassadors: 3       # even in a firm of 20, three people with set-aside time is a network
+  exchange_max_days: 60           # a monthly exchange, with a month of slack
+  min_training_coverage: 0.80     # share of a team trained at the basic level
+  min_nonvolunteer_reach: 0.50    # share of the people who did not volunteer who were trained
+  min_team_size_for_ambassador: 5 # smaller teams are covered by a neighbouring ambassador
+
+checks:
+  - id: network_too_small
+    scope: network
+    severity: medium
+    title: Fewer active AI ambassadors than the minimum
+    action: Appoint ambassadors until there are at least three, each with protected time agreed with their manager.
+    ref: Foundations toolkit, AI ambassadors, role and selection
+
+  - id: no_protected_time
+    scope: ambassador
+    severity: medium
+    title: Ambassador with no protected time
+    action: Agree hours per month with the manager and put them in the ambassador's calendar. A name without time is a list, not a network.
+    ref: Foundations toolkit, AI ambassadors, scoring guide (ceiling 2 without protected time)
+
+  - id: manager_not_agreed
+    scope: ambassador
+    severity: low
+    title: Ambassador role not agreed with the manager
+    action: Agree the role and the hours with the manager, so the time is real.
+    ref: Foundations toolkit, AI ambassadors, role and selection
+
+  - id: exchange_overdue
+    scope: ambassador
+    severity: low
+    title: No ambassador exchange recorded recently
+    action: Hold the monthly exchange, or record the date of the last one.
+    ref: Foundations toolkit, AI ambassadors, monthly exchange
+
+  - id: team_without_ambassador
+    scope: team
+    severity: medium
+    title: Team without an active ambassador
+    action: Pick an ambassador for this team with its manager, or name the neighbouring ambassador who covers it.
+    ref: Foundations toolkit, AI ambassadors, who to pick
+
+  - id: low_coverage
+    scope: team
+    severity: medium
+    title: Basic AI training has not reached enough of the team
+    action: Run the basic session inside this team's own meeting and log everyone who attends.
+    ref: Foundations toolkit, Training, training design
+
+  - id: non_volunteers_not_reached
+    scope: team
+    severity: medium
+    title: People who did not volunteer are not being reached
+    action: Name the people not yet trained, and have the team manager or an ambassador ask each of them in person.
+    ref: Foundations toolkit, Training, reaching non-volunteers
