@@ -60,3 +60,21 @@ def test_empty_clears_training_log():
     at = run()
     at.button(key="btn_empty").click().run()
     assert not at.exception and at.session_state.training == []
+
+
+def test_ambassadors_tab_shows_ceilings_and_issues():
+    at = run()
+    text = all_md(at)
+    assert "records support a score of 3 at most" in text      # ambassadors: teams without an ambassador
+    assert "records support a score of 5 at most" in text      # training: volunteers tracked, coverage fine
+    assert "Ambassador with no protected time" in text
+    assert "People who did not volunteer are not being reached" in text
+    assert at.session_state.ambassadors and at.session_state.coverage
+
+
+def test_empty_register_also_empties_ambassadors():
+    at = run()
+    at.button(key="btn_empty").click().run()
+    assert not at.exception
+    assert at.session_state.ambassadors == [] and at.session_state.coverage == []
+    assert "records support a score of 1 at most" in all_md(at)

@@ -30,6 +30,21 @@ from usecasereg import (  # noqa: E402
     to_xlsx,
     value_errors,
 )
+from usecasereg.ambassadors import (  # noqa: E402
+    AMBASSADORS,
+    COVERAGE,
+    ambassador_errors,
+    ambassador_summary,
+    ambassadors_to_csv,
+    check_ambassadors,
+    coverage_errors,
+    coverage_to_csv,
+    foundation_ceilings,
+    normalise_ambassadors,
+    normalise_coverage,
+    read_ambassadors,
+    read_coverage,
+)
 from usecasereg.engine import normalise  # noqa: E402
 from usecasereg.evidence import evidence_pack, evidence_zip  # noqa: E402
 from usecasereg.pdf import markdown_to_pdf  # noqa: E402
@@ -47,6 +62,8 @@ RISK_CHECK = "https://ai-act-risk-check.streamlit.app"
 REPO = "https://github.com/gifmaster/ai-use-case-register"
 SAMPLE = ROOT / "samples" / "fjordvik_logistik_register.csv"
 SAMPLE_LOG = ROOT / "samples" / "fjordvik_logistik_training_log.csv"
+SAMPLE_AMB = ROOT / "samples" / "fjordvik_logistik_ambassadors.csv"
+SAMPLE_COV = ROOT / "samples" / "fjordvik_logistik_team_coverage.csv"
 SEV = {"high": "🔴", "medium": "🟠", "low": "🟡"}
 
 st.set_page_config(page_title="AI Use Case Register", page_icon="🗂️", layout="wide")
@@ -67,9 +84,21 @@ def set_training(rows):
     st.session_state.log_version = st.session_state.get("log_version", 0) + 1
 
 
+def set_ambassadors(rows):
+    st.session_state.ambassadors = rows
+    st.session_state.amb_version = st.session_state.get("amb_version", 0) + 1
+
+
+def set_coverage(rows):
+    st.session_state.coverage = rows
+    st.session_state.cov_version = st.session_state.get("cov_version", 0) + 1
+
+
 if "rows" not in st.session_state:
     set_rows(read_csv(SAMPLE.read_bytes()))
     set_training(read_training(SAMPLE_LOG.read_bytes()))
+    set_ambassadors(read_ambassadors(SAMPLE_AMB.read_bytes()))
+    set_coverage(read_coverage(SAMPLE_COV.read_bytes()))
     st.session_state.org = "Fjordvik Logistik A/S (fictional)"
 
 # --- Sidebar -------------------------------------------------------------------
@@ -93,15 +122,37 @@ with st.sidebar:
             st.success(f"Loaded {len(st.session_state.training)} training entries.")
         except Exception as exc:
             st.error(f"Could not read the training log: {exc}")
+    with st.expander("AI ambassadors and team coverage, optional"):
+        up_amb = st.file_uploader("Ambassador roster (CSV or Excel)", type=["csv", "xlsx"], key="up_amb")
+        if up_amb and st.session_state.get("loaded_amb") != (up_amb.name, up_amb.size):
+            try:
+                set_ambassadors(read_ambassadors(up_amb.getvalue(), up_amb.name))
+                st.session_state.loaded_amb = (up_amb.name, up_amb.size)
+                st.success(f"Loaded {len(st.session_state.ambassadors)} ambassadors.")
+            except Exception as exc:
+                st.error(f"Could not read the roster: {exc}")
+        up_cov = st.file_uploader("Team coverage (CSV or Excel)", type=["csv", "xlsx"], key="up_cov",
+                                  help="One row per team: headcount, how many had the basic session, and how many of those volunteered.")
+        if up_cov and st.session_state.get("loaded_cov") != (up_cov.name, up_cov.size):
+            try:
+                set_coverage(read_coverage(up_cov.getvalue(), up_cov.name))
+                st.session_state.loaded_cov = (up_cov.name, up_cov.size)
+                st.success(f"Loaded {len(st.session_state.coverage)} teams.")
+            except Exception as exc:
+                st.error(f"Could not read the coverage file: {exc}")
     c1, c2 = st.columns(2)
     if c1.button("Sample", width="stretch", key="btn_sample"):
         set_rows(read_csv(SAMPLE.read_bytes()))
         set_training(read_training(SAMPLE_LOG.read_bytes()))
+        set_ambassadors(read_ambassadors(SAMPLE_AMB.read_bytes()))
+        set_coverage(read_coverage(SAMPLE_COV.read_bytes()))
         st.session_state.org = "Fjordvik Logistik A/S (fictional)"
         st.rerun()
     if c2.button("Empty", width="stretch", key="btn_empty"):
         set_rows([])
         set_training([])
+        set_ambassadors([])
+        set_coverage([])
         st.session_state.org = ""
         st.rerun()
     st.caption("Nothing is stored on the server. Download your register before closing the page.")
@@ -113,10 +164,13 @@ with st.sidebar:
 
 rows = st.session_state.rows
 training = st.session_state.training
+ambassadors = st.session_state.ambassadors
+coverage = st.session_state.coverage
 issues = checks().run(rows)
 errors = value_errors(rows)
 training_issues = check_training(training, rows)
 log_errors = training_errors(training)
+amb_issues = check_ambassadors(ambassadors, coverage)
 
 st.title("AI Use Case Register")
 st.caption(f"Built by [Alexander Senderovitz](https://senderovitz.eu) · Rules last reviewed {SCHEMA.last_reviewed}")
@@ -124,8 +178,9 @@ st.caption(f"{st.session_state.org or 'Your organisation'} · {len(rows)} use ca
 st.markdown("**Already have a register in Excel?** Upload it in the sidebar and get a health check: missing owners, overdue reviews, "
             "high-risk systems without a FRIA, and more. No new system to adopt, and nothing is stored.")
 
-tab_over, tab_reg, tab_health, tab_lit, tab_add, tab_export = st.tabs(
-    ["Overview", "Register", f"Health check ({len(issues)})", f"AI literacy ({len(training_issues)})", "Add use case", "Export"])
+tab_over, tab_reg, tab_health, tab_lit, tab_amb, tab_add, tab_export = st.tabs(
+    ["Overview", "Register", f"Health check ({len(issues)})", f"AI literacy ({len(training_issues)})",
+     f"Ambassadors and reach ({len(amb_issues)})", "Add use case", "Export"])
 
 # --- Overview -----------------------------------------------------------------
 with tab_over:
@@ -215,6 +270,60 @@ with tab_lit:
         st.warning("Values to fix:\n\n" + "\n".join(f"- {e}" for e in log_errors))
     st.caption("Log groups rather than individuals where that is enough. Several use cases in one entry: separate the IDs with ';'.")
 
+# --- Ambassadors and reach ------------------------------------------------------
+with tab_amb:
+    st.markdown("A network of AI ambassadors and training that reaches people who did not volunteer are two of the "
+                "six foundations in the AI Value Map. This tab checks the records for both. It shows the **highest score "
+                "the records can support**, not a score: a person still scores the foundation, from the scoring guides of the "
+                "Foundations toolkits.")
+    sm = ambassador_summary(ambassadors, coverage)
+    m = st.columns(5)
+    m[0].metric("Active ambassadors", sm["active_ambassadors"])
+    m[1].metric("Hours per month", sm["hours_per_month"])
+    m[2].metric("Trained (basic level)", f"{sm['share_trained']:.0%}" if sm["share_trained"] is not None else "none")
+    m[3].metric("Non-volunteers reached", f"{sm['non_volunteer_reach']:.0%}" if sm["non_volunteer_reach"] is not None else "not tracked",
+                help="Of the people who did not volunteer, the share who had the basic session.")
+    m[4].metric("Last exchange", sm["last_exchange"] or "none")
+    ceilings = foundation_ceilings(ambassadors, coverage)
+    c1, c2 = st.columns(2)
+    for col, key, title in ((c1, "ambassadors", "AI ambassadors"), (c2, "training", "Training")):
+        ceiling, why = ceilings[key]
+        with col.container(border=True):
+            st.markdown(f"**{title}: records support a score of {ceiling} at most**  \n{why}")
+    for i in amb_issues:
+        with st.container(border=True):
+            st.markdown(f"{SEV[i.severity]} **{i.use_case_id} {i.name}** · {i.title}  \n{i.action}  \n`{i.ref}` · rule `{i.check_id}`")
+    if not amb_issues:
+        st.success("No gaps found in the roster and the coverage figures.")
+    st.subheader("Ambassador roster")
+    adf = pd.DataFrame(ambassadors, columns=AMBASSADORS.ids)
+    acfg = {c: st.column_config.SelectboxColumn(AMBASSADORS.labels[c], options=[""] + v) for c, v in AMBASSADORS.allowed.items()}
+    acfg.update({c: st.column_config.TextColumn(AMBASSADORS.labels[c]) for c in AMBASSADORS.ids if c not in AMBASSADORS.allowed})
+    aedited = st.data_editor(adf, column_config=acfg, num_rows="dynamic", hide_index=True, width="stretch",
+                             key=f"amb_{st.session_state.get('amb_version', 0)}")
+    new_amb = normalise_ambassadors(aedited.fillna("").to_dict("records"))
+    if new_amb != ambassadors:
+        st.session_state.ambassadors = new_amb
+        st.rerun()
+    amb_errs = ambassador_errors(ambassadors)
+    if amb_errs:
+        st.warning("Values to fix:\n\n" + "\n".join(f"- {e}" for e in amb_errs))
+    st.subheader("Team coverage")
+    cdf = pd.DataFrame(coverage, columns=COVERAGE.ids)
+    ccfg = {c: st.column_config.TextColumn(COVERAGE.labels[c]) for c in COVERAGE.ids}
+    cedited = st.data_editor(cdf, column_config=ccfg, num_rows="dynamic", hide_index=True, width="stretch",
+                             key=f"cov_{st.session_state.get('cov_version', 0)}")
+    new_cov = normalise_coverage(cedited.fillna("").to_dict("records"))
+    if new_cov != coverage:
+        st.session_state.coverage = new_cov
+        st.rerun()
+    cov_errs = coverage_errors(coverage)
+    if cov_errs:
+        st.warning("Values to fix:\n\n" + "\n".join(f"- {e}" for e in cov_errs))
+    st.caption("Counts per team, not names of staff: who has been trained is HR data, and counts are enough to see who is not reached. "
+               "Ambassador names can be roles or initials. Nothing is stored; download the files before you close the page. "
+               f"Thresholds are a draft and can be changed in the [rules file]({REPO}/blob/main/src/usecasereg/rules/ambassadors.yaml).")
+
 # --- Add use case -------------------------------------------------------------
 with tab_add:
     st.markdown(f"Fill in what you know. Classify first with the [EU AI Act Risk Check]({RISK_CHECK}) and upload its report to fill in the tier.")
@@ -280,6 +389,9 @@ with tab_export:
 
     st.subheader("AI literacy and evidence")
     st.download_button("Training log (CSV)", training_to_csv(training), f"{slug}-training-log.csv", "text/csv")
+    c1, c2 = st.columns(2)
+    c1.download_button("Ambassador roster (CSV)", ambassadors_to_csv(ambassadors), f"{slug}-ambassadors.csv", "text/csv", key="dl_amb")
+    c2.download_button("Team coverage (CSV)", coverage_to_csv(coverage), f"{slug}-team-coverage.csv", "text/csv", key="dl_cov")
     pack = evidence_pack(rows, issues, training, training_issues, st.session_state.org)
     st.markdown("**Evidence pack.** One document for a customer questionnaire, an auditor or an authority: the use cases, "
                 "impact assessment decisions, AI literacy measures and open issues. The ZIP adds the register, the training log "

@@ -1,0 +1,45 @@
+# Answer key for samples/fjordvik_logistik_ambassadors.csv and samples/fjordvik_logistik_team_coverage.csv,
+# checked on 2026-10-26. Worked by hand before the code was written.
+# Thresholds (rules/ambassadors.yaml): at least 3 active ambassadors, exchange at most 60 days ago,
+# training coverage at least 80 %, non-volunteer reach at least 50 %, teams of 5 or more need an ambassador.
+#
+# Coverage per team, trained / headcount, and non-volunteer reach (trained - volunteers) / (headcount - volunteers):
+#   Operations 8/8, reach 3/3        Customer Service 11/12 (92 %), reach 5/6 (83 %)
+#   HR 5/5, reach 2/2                Transport 9/14 (64 %), reach 7/12 (58 %)
+#   Warehouse 9/16 (56 %), reach 6/13 (46 %)   Finance 6/6, reach 4/4
+#   Planning 5/5, reach 2/2          Marketing 4/4, reach 1/1       Legal 2/2, reach 1/1
+# Teams with no active ambassador: Transport, Warehouse, Marketing (4 people, exempt), Legal (2 people, exempt).
+# A-004 last exchange 2026-07-02 is 116 days ago. A-005 started 2026-09-01 (55 days) and has no exchange yet: not overdue.
+# no_ambassadors_at_all and network_too_small are covered by separate tests that remove ambassadors.
+
+today: "2026-10-26"
+issues:
+  A-001: []
+  A-002: []
+  A-003: [no_protected_time]
+  A-004: [manager_not_agreed, exchange_overdue]
+  A-005: []
+  Operations: []
+  Customer Service: []
+  HR: []
+  Transport: [low_coverage, team_without_ambassador]
+  Warehouse: [low_coverage, non_volunteers_not_reached, team_without_ambassador]
+  Finance: []
+  Planning: []
+  Marketing: []
+  Legal: []
+  Ambassador network: []
+
+summary:
+  active_ambassadors: 5
+  hours_per_month: 10
+  headcount: 72
+  trained: 59
+  share_trained: 0.82           # 59 / 72
+  non_volunteer_reach: 0.7045   # non-volunteers reached 59 - 28 = 31, of 72 - 28 = 44 (28 volunteers)
+  last_exchange: "2026-10-14"
+
+# Foundations evidence caps, following the scoring guides of the toolkits:
+caps:
+  ambassadors: 3    # evidence ceiling 3: teams of 5 or more without an ambassador exist (Transport, Warehouse)
+  training: 5       # no ceiling: volunteers are tracked in every team

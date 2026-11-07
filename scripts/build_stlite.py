@@ -16,7 +16,8 @@ from pathlib import Path
 STLITE_VERSION = "1.12.0"
 ROOT = Path(__file__).resolve().parent.parent
 # Everything the app reads at run time. Tests and docs stay out, except files the app reads.
-INCLUDE = ["app.py", "NOTICE", "LICENSE", "samples/fjordvik_logistik_register.csv", "samples/fjordvik_logistik_training_log.csv"]
+INCLUDE = ["app.py", "NOTICE", "LICENSE", "samples/fjordvik_logistik_register.csv", "samples/fjordvik_logistik_training_log.csv",
+           "samples/fjordvik_logistik_ambassadors.csv", "samples/fjordvik_logistik_team_coverage.csv"]
 INCLUDE_DIRS = ["src/usecasereg"]
 SKIP = {"__pycache__", ".pyc"}
 

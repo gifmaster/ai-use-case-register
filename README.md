@@ -67,6 +67,12 @@ Art. 4 asks for measures that support AI literacy, not a guaranteed level for ea
 
 The evidence pack only summarises what the register and the log say, with the gaps the checks found. It is not an audit or a certificate, and says so on its last page.
 
+## AI ambassadors and who the training reaches
+
+Two foundations of the AI Value Map, AI ambassadors and training, need records the register did not hold: a roster of the ambassadors, and how far the basic training has reached in each team, including people who did not volunteer. The **Ambassadors and reach** tab takes two small files (see [`samples/`](samples)): a roster with hours per month, manager agreement and the date of the last exchange, and a coverage file with one row per team (headcount, trained, of whom volunteers). It runs seven checks, kept in [`ambassadors.yaml`](src/usecasereg/rules/ambassadors.yaml) with their thresholds, and shows the highest score the records can support for each foundation. That is a ceiling, not a score: a person scores the foundation.
+
+The coverage file holds counts per team, not names, on purpose. Who has been trained is HR data, and counts are enough to see who is not reached. The thresholds (three ambassadors, an exchange every 60 days, 80 % trained, half of the non-volunteers reached, teams of five or more need an ambassador) are a draft with no outcome data behind them.
+
 ## Where it fits
 
 Use it as a **health check for the spreadsheet you already have**, or as a lightweight register when you have none. It is not a workflow platform: no approvals, reminders, accounts or audit trail. If you outgrow it, the Export tab writes a CSV with plain headers that is easy to map into a GRC platform's import. Mandatory registers (GDPR Art. 30, the DORA Register of Information) are separate and are not replaced by this one.
@@ -91,7 +97,7 @@ pip install pytest
 pytest
 ```
 
-72 tests, including:
+103 tests, including:
 
 - the sample register has **planted problems**, and an [answer key](tests/expected_issues.yaml) states exactly which checks must fire for which use case. Every check is covered, and a check firing where it should not fails the build
 - the intensity matrix, case by case
@@ -99,6 +105,7 @@ pytest
 - CSV (comma or semicolon) and Excel round trips
 - import of Risk Check reports, and app smoke tests
 - a training log with planted gaps and its own [answer key](tests/expected_training_issues.yaml), the evidence pack's contents and its ZIP annexes
+- an ambassador roster and team coverage with a hand-worked [answer key](tests/expected_ambassador_issues.yaml), written before the code, covering every check, the summary figures and the score ceilings
 
 ## Part of a toolkit
 
